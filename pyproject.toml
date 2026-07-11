@@ -1,0 +1,88 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# ============================================================
+# Metadata proyek (PEP 621)
+# ============================================================
+[project]
+name = "prediksi-haid"
+version = "0.1.0"
+description = "Prediksi keteraturan haid santriwati berdasarkan jadwal kegiatan (Decision Tree / KDD)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Peneliti Skripsi" }]
+keywords = ["decision-tree", "kdd", "data-mining", "klasifikasi", "skripsi"]
+
+# Dependensi inti (selaras requirements.txt / §2.1)
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "scikit-learn>=1.5",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "joblib>=1.4",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# Pustaka pendukung (§2.2) — pip install -e ".[extra]"
+extra = [
+    "imbalanced-learn>=0.12",
+    "openpyxl>=3.1",
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+]
+# Pustaka pengembangan (§2.3) — pip install -e ".[dev]"
+dev = [
+    "pytest>=8.2",
+    "ruff>=0.5",
+    "black>=24.4",
+    "mypy>=1.10",
+    "jupyter>=1.0",
+]
+
+# Entry-point CLI opsional (bisa dipanggil sebagai perintah)
+[project.scripts]
+prediksi-haid-train = "prediksi_haid.pipeline:run_training_pipeline"
+
+# ------------------------------------------------------------
+# Konfigurasi paket (src-layout)
+# ------------------------------------------------------------
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# ------------------------------------------------------------
+# Ruff (linter + formatter)
+# ------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "scripts", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+# ------------------------------------------------------------
+# Black
+# ------------------------------------------------------------
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+# ------------------------------------------------------------
+# Mypy
+# ------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+packages = ["prediksi_haid"]
+
+# ------------------------------------------------------------
+# Pytest
+# ------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v"

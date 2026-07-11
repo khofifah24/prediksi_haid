@@ -1,0 +1,51 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.Python
+
+# ===== Virtual environment =====
+.venv/
+venv/
+env/
+
+# ===== Env / secrets =====
+.env
+
+# ===== Tooling caches =====
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# ===== Artefak yang DIHASILKAN pipeline (jangan di-commit) =====
+# Data mentah & antara — biasanya tidak di-commit (privasi + ukuran).
+data/raw/*
+data/interim/*
+data/processed/*
+# ...tapi tetap simpan folder + template contoh:
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!data/raw/contoh_kuesioner_santriwati.csv
+
+# Model & encoder terlatih
+models/*.joblib
+
+# Laporan hasil (JSON/PNG/CSV) yang diekspor pipeline
+reports/figures/*.png
+reports/*.json
+reports/*.csv
+!reports/figures/.gitkeep
+
+# ===== IDE / OS =====
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ===== Dokumen sumber pribadi (jangan dipublikasikan) =====
+*.pdf

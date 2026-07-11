@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evaluasi Model · Prediksi Haid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/theme.js"></script>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    layout("Evaluasi Model", "Metrik performa & visualisasi hasil Decision Tree", "evaluasi");
+
+    (async () => {
+      const page = document.getElementById("page");
+      const m = await loadReport("metrik_evaluasi.json");
+      if (!m) { page.innerHTML = emptyState("Belum ada metrik",
+        "Jalankan Proses Decision Tree terlebih dahulu.",
+        `<a href="proses.html" class="btn btn-primary inline-flex">Buka Proses</a>`); return; }
+
+      const metric = (label, value, hint, accent) => `
+        <div class="card card-hover p-4 fade-up">
+          <p class="text-[0.75rem]" style="color:var(--muted)">${label}</p>
+          <p class="text-[1.7rem] font-extrabold mt-1 leading-none" style="color:${accent}">${value}</p>
+          <div class="mt-2 h-1.5 rounded-full" style="background:var(--line)">
+            <div class="h-1.5 rounded-full" style="width:${hint}%;background:${accent}"></div></div>
+        </div>`;
+
+      const pctv = (x) => (x*100).toFixed(1)+"%";
+      page.innerHTML = `
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+          ${metric("Accuracy", pctv(m.accuracy), m.accuracy*100, "#0d9488")}
+          ${metric("Precision", m.precision.toFixed(2), m.precision*100, "#6366f1")}
+          ${metric("Recall", m.recall.toFixed(2), m.recall*100, "#0ea5e9")}
+          ${metric("F1-Score", m.f1_score.toFixed(2), m.f1_score*100, "#8b5cf6")}
+          ${metric("ROC-AUC", isNaN(m.roc_auc)?"—":m.roc_auc.toFixed(2), (m.roc_auc||0)*100, "#10b981")}
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+          <div class="card p-5 fade-up">
+            <h3 class="font-semibold mb-3" style="color:var(--ink)">Confusion Matrix</h3>
+            ${confusionHTML(m.confusion_matrix)}
+          </div>
+          ${figCard("Kurva ROC", "kurva_roc.png")}
+        </div>
+
+        <div class="mt-4">
+          ${figCard("Visualisasi Pohon Keputusan", "pohon_keputusan.png", true)}
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+          ${figCard("Confusion Matrix (Heatmap)", "confusion_matrix.png")}
+          ${figCard("Feature Importance", "feature_importance.png")}
+        </div>`;
+    })();
+
+    function confusionHTML(cm){
+      const [[tn,fp],[fn,tp]] = cm;
+      const max = Math.max(tn,fp,fn,tp) || 1;
+      const cell = (v, good) => {
+        const a = 0.12 + (v/max)*0.55;
+        const col = good ? `rgb(16 185 129 / ${a})` : `rgb(245 158 11 / ${a})`;
+        return `<div class="rounded-xl flex flex-col items-center justify-center py-6"
+          style="background:${col}"><span class="text-[1.5rem] font-extrabold" style="color:var(--ink)">${v}</span></div>`;
+      };
+      return `<div class="grid grid-cols-[auto_1fr_1fr] gap-2 text-[0.72rem]" style="color:var(--muted)">
+        <div></div><div class="text-center font-semibold pb-1">Pred: Tdk Teratur</div><div class="text-center font-semibold pb-1">Pred: Teratur</div>
+        <div class="flex items-center font-semibold">Aktual:<br>Tdk Teratur</div>${cell(tn,true)}${cell(fp,false)}
+        <div class="flex items-center font-semibold">Aktual:<br>Teratur</div>${cell(fn,false)}${cell(tp,true)}
+      </div>
+      <p class="text-[0.74rem] mt-3" style="color:var(--muted)">Diagonal (hijau) = prediksi benar · Off-diagonal (amber) = keliru.</p>`;
+    }
+
+    function figCard(title, src, download){
+      return `<div class="card p-5 fade-up">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold" style="color:var(--ink)">${title}</h3>
+          ${download?`<a href="../reports/figures/${src}" download class="btn btn-ghost" style="padding:.35rem .7rem">⬇ PNG</a>`:""}
+        </div>
+        <div class="rounded-xl overflow-hidden flex items-center justify-center" style="background:var(--plane);min-height:180px">
+          <img src="../reports/figures/${src}" alt="${title}" class="max-w-full"
+            onerror="this.parentElement.innerHTML='<p class=&quot;text-[0.82rem] py-8&quot; style=&quot;color:var(--muted)&quot;>Gambar belum tersedia — jalankan pipeline.</p>'"/>
+        </div></div>`;
+    }
+  </script>
+</body>
+</html>

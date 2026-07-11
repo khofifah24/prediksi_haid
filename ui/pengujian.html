@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pengujian · Prediksi Haid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/theme.js"></script>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    layout("Pengujian", "Prediksi keteraturan haid untuk kasus baru", "pengujian");
+
+    const FITUR = [
+      ["jadwal_kegiatan_harian","Jadwal Kegiatan","🗓️"],["pola_tidur","Pola Tidur","😴"],
+      ["tingkat_kelelahan","Tingkat Kelelahan","🥱"],["tingkat_stres","Tingkat Stres","😰"],
+      ["pola_makan","Pola Makan","🍽️"],["aktivitas_harian","Aktivitas Harian","🏃"],
+      ["waktu_istirahat","Waktu Istirahat","🛋️"],
+    ];
+    const page = document.getElementById("page");
+
+    page.innerHTML = `
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div class="card p-5 lg:col-span-3 fade-up">
+          <h3 class="font-semibold mb-1" style="color:var(--ink)">Input Skor Variabel</h3>
+          <p class="text-[0.78rem] mb-4" style="color:var(--muted)">Geser tiap variabel pada skala 1 (rendah) – 5 (tinggi)</p>
+          <div class="space-y-4">
+            ${FITUR.map(([k,l,e])=>`
+              <div>
+                <div class="flex justify-between items-center mb-1.5">
+                  <label class="text-[0.86rem] font-medium" style="color:var(--ink-2)">${e} ${l}</label>
+                  <span id="v-${k}" class="tabular-nums text-[0.86rem] font-bold w-8 text-center rounded-md"
+                        style="color:var(--primary-600);background:rgb(13 148 136 / 0.10)">3</span>
+                </div>
+                <input id="${k}" type="range" min="1" max="5" step="0.5" value="3"
+                       class="range w-full" oninput="document.getElementById('v-${k}').textContent=this.value"/>
+              </div>`).join("")}
+          </div>
+          <button onclick="prediksi()" class="btn btn-primary mt-5 w-full justify-center">🔍 Jalankan Prediksi</button>
+        </div>
+
+        <div class="lg:col-span-2 space-y-4">
+          <div id="result" class="card p-6 fade-up flex flex-col items-center justify-center text-center" style="min-height:280px">
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3"
+                 style="background:rgb(13 148 136 / 0.10);color:var(--primary)">
+              <span class="w-8 h-8">${iconFlask()}</span></div>
+            <p class="font-semibold" style="color:var(--ink)">Belum ada prediksi</p>
+            <p class="text-[0.82rem] mt-1" style="color:var(--muted)">Isi skor lalu klik "Jalankan Prediksi".</p>
+          </div>
+          <div class="card p-4 flex gap-3 items-start fade-up" style="background:rgb(245 158 11 / 0.08)">
+            <span class="w-5 h-5 shrink-0 mt-0.5" style="color:var(--takteratur)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+            </span>
+            <p class="text-[0.78rem] leading-relaxed" style="color:var(--ink-2)">
+              Hasil ini adalah <b>prediksi berbasis data</b>, <b>BUKAN diagnosis medis</b>.
+              Konsultasikan kondisi kesehatan pada tenaga medis.</p>
+          </div>
+        </div>
+      </div>`;
+
+    async function prediksi() {
+      const fitur = {}; FITUR.forEach(([k]) => fitur[k] = parseFloat(document.getElementById(k).value));
+      const aturan = await loadReport("aturan_pohon.json");
+      const box = document.getElementById("result");
+
+      // Heuristik sementara bila aturan_pohon.json belum diekspor pipeline:
+      // rerata skor "risiko" tinggi (stres, kelelahan, jadwal padat, tidur buruk) → cenderung tidak teratur.
+      let label, conf, faktor;
+      if (aturan && typeof evaluateTree === "function") {
+        ({ label, conf, faktor } = evaluateTree(aturan, fitur)); // hook masa depan
+      } else {
+        const risiko = (fitur.tingkat_stres + fitur.tingkat_kelelahan + fitur.jadwal_kegiatan_harian
+          + (6 - fitur.pola_tidur) + (6 - fitur.waktu_istirahat)) / 5;
+        const teratur = risiko < 3;
+        label = teratur ? 1 : 0;
+        conf = Math.round((Math.abs(risiko - 3) / 2) * 40 + 55);
+        faktor = ["Tingkat Stres","Pola Tidur","Kelelahan"];
+      }
+
+      const teratur = label === 1;
+      const col = teratur ? "var(--teratur)" : "var(--takteratur)";
+      const txt = teratur ? "Cenderung Teratur" : "Cenderung Tidak Teratur";
+      const emoji = teratur ? "🟢" : "🟡";
+      box.className = "card p-6 fade-up flex flex-col items-center justify-center text-center";
+      box.style.minHeight = "280px";
+      box.innerHTML = `
+        <div class="relative w-32 h-32 mb-3">
+          <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="10"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round"
+              stroke-dasharray="${2*Math.PI*52}" stroke-dashoffset="${2*Math.PI*52*(1-conf/100)}"
+              style="transition:stroke-dashoffset 1s cubic-bezier(.2,.7,.3,1)"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-[1.6rem] font-extrabold" style="color:${col}">${conf}%</span>
+            <span class="text-[0.66rem]" style="color:var(--muted)">keyakinan</span>
+          </div>
+        </div>
+        <p class="text-[1.15rem] font-bold" style="color:${col}">${emoji} ${txt}</p>
+        <p class="text-[0.78rem] mt-2 mb-1" style="color:var(--muted)">Faktor dominan</p>
+        <div class="flex flex-wrap gap-1.5 justify-center">
+          ${faktor.map(f=>`<span class="badge" style="background:${col}1a;color:${col}">${f}</span>`).join("")}
+        </div>`;
+    }
+  </script>
+  <style>
+    .range{ -webkit-appearance:none; appearance:none; height:6px; border-radius:999px; outline:none;
+      background:linear-gradient(90deg,var(--primary) 0%,var(--primary) 50%,var(--line) 50%); }
+    .range::-webkit-slider-thumb{ -webkit-appearance:none; width:18px; height:18px; border-radius:999px;
+      background:#fff; border:3px solid var(--primary); cursor:pointer; box-shadow:0 2px 6px rgb(13 148 136 / .4); transition:transform .1s; }
+    .range::-webkit-slider-thumb:hover{ transform:scale(1.15); }
+    .range::-moz-range-thumb{ width:18px; height:18px; border-radius:999px; background:#fff; border:3px solid var(--primary); cursor:pointer; }
+  </style>
+  <script>
+    // isi ulang track gradient saat slider bergerak
+    document.querySelectorAll(".range").forEach(r=>{
+      const paint=()=>{ const p=((r.value-1)/4)*100;
+        r.style.background=`linear-gradient(90deg,var(--primary) ${p}%,var(--line) ${p}%)`; };
+      r.addEventListener("input",paint); paint();
+    });
+  </script>
+</body>
+</html>

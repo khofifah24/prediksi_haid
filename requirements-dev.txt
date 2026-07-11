@@ -1,0 +1,12 @@
+# ============================================================
+# Dependensi PENGEMBANGAN (dev) — §2.3
+# Instal:  pip install -r requirements-dev.txt
+# (sudah mencakup requirements.txt di bawah)
+# ============================================================
+-r requirements.txt
+
+pytest>=8.2       # pengujian unit
+ruff>=0.5         # linter + formatter
+black>=24.4       # formatter (opsional bila tak pakai ruff-format)
+mypy>=1.10        # pemeriksaan tipe statis
+jupyter>=1.0      # eksplorasi notebook (EDA)

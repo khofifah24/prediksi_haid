@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Santriwati · Prediksi Haid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/theme.js"></script>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    layout("Data Santriwati", "Kelola dataset kuesioner untuk proses Decision Tree", "santriwati");
+
+    (async () => {
+      const page = document.getElementById("page");
+      const rows = await loadReport("data_santriwati.json");
+
+      const toolbar = `
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color:var(--muted)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            </span>
+            <input id="search" class="field pl-9 w-64" placeholder="Cari ID santriwati..." oninput="filterRows()"/>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button class="btn btn-ghost">${dl()} Template CSV</button>
+            <button class="btn btn-ghost">${beaker()} Preprocessing</button>
+            <button class="btn btn-ghost">${up()} Import</button>
+            <button class="btn btn-primary">${plus()} Tambah Data</button>
+          </div>
+        </div>`;
+
+      if (!rows || !rows.length) {
+        page.innerHTML = toolbar + emptyState("Belum ada data",
+          "Impor CSV kuesioner atau tambah data manual untuk memulai.",
+          `<button class="btn btn-primary inline-flex">${up()} Import Data</button>`);
+        return;
+      }
+
+      const KOL = [
+        ["jadwal_kegiatan_harian","Jadwal"],["pola_tidur","Tidur"],["tingkat_kelelahan","Lelah"],
+        ["tingkat_stres","Stres"],["pola_makan","Makan"],["aktivitas_harian","Aktv"],["waktu_istirahat","Istrht"],
+      ];
+
+      const bar = (v) => {
+        const w = Math.max(0, Math.min(100, (v/5)*100));
+        return `<div class="flex items-center gap-2">
+          <div class="w-10 h-1.5 rounded-full" style="background:var(--line)">
+            <div class="h-1.5 rounded-full" style="width:${w}%;background:var(--primary)"></div></div>
+          <span class="tabular-nums text-[0.8rem]" style="color:var(--ink-2)">${(+v).toFixed(1)}</span></div>`;
+      };
+
+      page.innerHTML = toolbar + `
+        <div class="card overflow-hidden fade-up">
+          <div class="overflow-x-auto">
+            <table class="tbl">
+              <thead><tr>
+                <th>ID</th>${KOL.map(k=>`<th>${k[1]}</th>`).join("")}<th>Status</th><th></th>
+              </tr></thead>
+              <tbody id="tbody">
+                ${rows.map(r => `<tr data-id="${r.responden_id.toLowerCase()}">
+                  <td class="font-semibold" style="color:var(--ink)">${r.responden_id}</td>
+                  ${KOL.map(k => `<td>${bar(r[k[0]])}</td>`).join("")}
+                  <td>${statusBadge(r.status)}</td>
+                  <td><button class="w-7 h-7 rounded-lg flex items-center justify-center btn-ghost" style="padding:0" title="Aksi">⋮</button></td>
+                </tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3 text-[0.8rem]" style="border-top:1px solid var(--line);color:var(--muted)">
+            <span id="count">Menampilkan ${rows.length} data (contoh)</span>
+            <div class="flex gap-1">
+              <button class="btn btn-ghost" style="padding:.35rem .6rem">‹</button>
+              <button class="btn btn-primary" style="padding:.35rem .7rem">1</button>
+              <button class="btn btn-ghost" style="padding:.35rem .6rem">›</button>
+            </div>
+          </div>
+        </div>`;
+
+      window.filterRows = () => {
+        const q = document.getElementById("search").value.toLowerCase();
+        let n = 0;
+        document.querySelectorAll("#tbody tr").forEach(tr => {
+          const show = tr.dataset.id.includes(q);
+          tr.style.display = show ? "" : "none"; if (show) n++;
+        });
+        document.getElementById("count").textContent = `Menampilkan ${n} data`;
+      };
+    })();
+
+    function ic(p){return `<span class="w-4 h-4 inline-block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg></span>`;}
+    function dl(){return ic('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>');}
+    function up(){return ic('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/>');}
+    function plus(){return ic('<path d="M12 5v14M5 12h14"/>');}
+    function beaker(){return ic('<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/>');}
+  </script>
+</body>
+</html>

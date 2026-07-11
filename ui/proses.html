@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proses Decision Tree · Prediksi Haid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/theme.js"></script>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    layout("Proses Decision Tree", "Atur parameter lalu latih model lewat skrip Python", "proses");
+
+    const STEPS = ["Data Selection","Preprocessing","Transformation","Split 80:20","Build Tree","Simpan Model"];
+    const page = document.getElementById("page");
+
+    page.innerHTML = `
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <!-- Form parameter -->
+        <div class="card p-5 lg:col-span-3 fade-up">
+          <h3 class="font-semibold mb-4" style="color:var(--ink)">Parameter Model</h3>
+          <div class="grid sm:grid-cols-2 gap-4 text-[0.85rem]">
+            <div>
+              <label class="block mb-1.5 font-medium" style="color:var(--ink-2)">Kriteria Split</label>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="crit active"><input type="radio" name="crit" value="gini" checked hidden>Gini</label>
+                <label class="crit"><input type="radio" name="crit" value="entropy" hidden>Entropy</label>
+              </div>
+            </div>
+            <div><label class="block mb-1.5 font-medium" style="color:var(--ink-2)">Kedalaman Maks</label>
+              <input id="max_depth" class="field" value="auto"/></div>
+            <div><label class="block mb-1.5 font-medium" style="color:var(--ink-2)">Rasio Latih : Uji</label>
+              <select id="test_size" class="field">
+                <option value="0.20">80 : 20</option><option value="0.30">70 : 30</option><option value="0.25">75 : 25</option>
+              </select></div>
+            <div><label class="block mb-1.5 font-medium" style="color:var(--ink-2)">Pruning (ccp_alpha)</label>
+              <input id="ccp_alpha" class="field" value="0.0"/></div>
+            <div><label class="block mb-1.5 font-medium" style="color:var(--ink-2)">Random State</label>
+              <input id="random_state" class="field" value="42"/></div>
+            <div><label class="block mb-1.5 font-medium" style="color:var(--ink-2)">Class Weight</label>
+              <select id="class_weight" class="field"><option value="balanced">balanced</option><option value="null">none</option></select></div>
+          </div>
+          <div class="flex gap-2 mt-5">
+            <button onclick="jalankan()" class="btn btn-primary">▶ Jalankan Proses</button>
+            <button onclick="salinCmd()" class="btn btn-ghost" id="copybtn">⧉ Salin Perintah</button>
+          </div>
+          <div id="cmd-wrap" class="hidden mt-4">
+            <p class="text-[0.78rem] mb-1.5" style="color:var(--muted)">Jalankan di terminal (akar proyek):</p>
+            <pre class="rounded-xl p-3.5 text-[0.78rem] overflow-x-auto" style="background:#0b1220;color:#d1e7e3"><code id="cmd"></code></pre>
+          </div>
+        </div>
+
+        <!-- Progres KDD -->
+        <div class="card p-5 lg:col-span-2 fade-up">
+          <h3 class="font-semibold mb-4" style="color:var(--ink)">Progres KDD</h3>
+          <ol id="stepper" class="space-y-1">
+            ${STEPS.map((s,i)=>`
+              <li class="flex items-center gap-3 py-2 px-2 rounded-lg" data-step="${i}">
+                <span class="dot w-6 h-6 rounded-full flex items-center justify-center text-[0.72rem] font-bold shrink-0"
+                      style="background:var(--line);color:var(--muted)">${i+1}</span>
+                <span class="lbl text-[0.86rem]" style="color:var(--muted)">${s}</span>
+              </li>`).join("")}
+          </ol>
+          <div id="done" class="hidden mt-3 p-3 rounded-xl text-[0.82rem]"
+               style="background:rgb(16 185 129 / 0.12);color:#047857">
+            ✅ Simulasi selesai. Setelah skrip Python dijalankan, buka
+            <a href="evaluasi.html" class="underline font-semibold">Evaluasi Model</a>.
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 mt-4 text-[0.82rem] fade-up" style="color:var(--muted)">
+        ⓘ UI ini <b style="color:var(--ink-2)">statis</b> — pelatihan dilakukan oleh Python (menjaga UI 100% HTML/CSS/JS).
+        Tombol di atas menyusun perintah & mensimulasikan tahapan agar mudah dipresentasikan.
+      </div>`;
+
+    // kriteria toggle
+    document.querySelectorAll(".crit").forEach(el => el.addEventListener("click", () => {
+      document.querySelectorAll(".crit").forEach(c => c.classList.remove("active"));
+      el.classList.add("active"); el.querySelector("input").checked = true;
+    }));
+
+    function buildCmd() {
+      const g = id => document.getElementById(id).value;
+      const crit = document.querySelector('input[name="crit"]:checked').value;
+      return `python scripts/run_training.py --config config/config.yaml\n`
+        + `# config/config.yaml → decision_tree.criterion=${crit}, max_depth=${g("max_depth")},\n`
+        + `#   ccp_alpha=${g("ccp_alpha")}, class_weight=${g("class_weight")} | split.test_size=${g("test_size")}, random_state=${g("random_state")}`;
+    }
+    function salinCmd(){ navigator.clipboard?.writeText(buildCmd());
+      const b=document.getElementById("copybtn"); b.textContent="✓ Tersalin"; setTimeout(()=>b.textContent="⧉ Salin Perintah",1500); }
+
+    async function jalankan() {
+      document.getElementById("cmd").textContent = buildCmd();
+      document.getElementById("cmd-wrap").classList.remove("hidden");
+      const items = [...document.querySelectorAll("#stepper li")];
+      document.getElementById("done").classList.add("hidden");
+      for (const li of items) { li.querySelector(".dot").style.background="var(--line)"; li.querySelector(".dot").style.color="var(--muted)"; }
+      for (let i=0;i<items.length;i++){
+        await new Promise(r=>setTimeout(r,420));
+        const dot=items[i].querySelector(".dot"), lbl=items[i].querySelector(".lbl");
+        dot.style.background="var(--teratur)"; dot.style.color="#fff"; dot.innerHTML="✓";
+        lbl.style.color="var(--ink)"; lbl.style.fontWeight="600";
+        items[i].style.background="rgb(16 185 129 / 0.06)";
+      }
+      document.getElementById("done").classList.remove("hidden");
+    }
+  </script>
+  <style>
+    .crit{ text-align:center; padding:.5rem; border-radius:.7rem; border:1px solid var(--line);
+      cursor:pointer; font-weight:600; color:var(--ink-2); transition:all .15s ease; }
+    .crit:hover{ border-color:var(--primary); }
+    .crit.active{ background:rgb(13 148 136 / 0.12); border-color:var(--primary); color:var(--primary-600); }
+    .dark .crit.active{ color:var(--primary); }
+  </style>
+</body>
+</html>

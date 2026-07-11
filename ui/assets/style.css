@@ -1,0 +1,118 @@
+/* ============================================================
+   Gaya kustom — pelengkap Tailwind. Token warna via CSS variables
+   agar dark mode & chart mengambil sumber yang sama.
+   Acuan palet: dataviz skill (hijau/amber CVD-safe, teal primary).
+   ============================================================ */
+
+:root {
+  --surface:      #ffffff;   /* permukaan kartu */
+  --plane:        #f6f8f9;   /* latar halaman */
+  --ink:          #0f172a;   /* teks utama */
+  --ink-2:        #475569;   /* teks sekunder */
+  --muted:        #94a3b8;   /* teks/axis redup */
+  --line:         #e6eaee;   /* garis hairline */
+  --primary:      #0d9488;
+  --primary-600:  #0f766e;
+  --teratur:      #10b981;
+  --takteratur:   #f59e0b;
+  --ring:         rgb(13 148 136 / 0.35);
+}
+
+.dark {
+  --surface:      #14181d;
+  --plane:        #0b0e11;
+  --ink:          #f1f5f9;
+  --ink-2:        #b6c0cc;
+  --muted:        #7c8896;
+  --line:         #232a31;
+  --primary:      #2dd4bf;
+  --primary-600:  #14b8a6;
+  --teratur:      #34d399;
+  --takteratur:   #fbbf24;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: "Inter", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  background: var(--plane);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Sidebar nav --- */
+.nav-link {
+  position: relative;
+  transition: background-color .18s ease, color .18s ease;
+}
+.nav-link.active {
+  background: linear-gradient(90deg, rgb(13 148 136 / 0.14), rgb(13 148 136 / 0.04));
+  color: var(--primary-600);
+  font-weight: 600;
+}
+.dark .nav-link.active { color: var(--primary); }
+.nav-link.active::before {
+  content: ""; position: absolute; left: 0; top: 18%; bottom: 18%;
+  width: 3px; border-radius: 0 3px 3px 0; background: var(--primary);
+}
+
+/* --- Kartu --- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 1.15rem;
+  box-shadow: 0 1px 3px rgb(16 24 40 / 0.04), 0 10px 30px -18px rgb(16 24 40 / 0.25);
+}
+.card-hover { transition: transform .2s ease, box-shadow .2s ease; }
+.card-hover:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -18px rgb(13 148 136 / 0.30); }
+
+/* --- Badge status --- */
+.badge { display: inline-flex; align-items: center; gap: .35rem;
+  padding: .2rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 600; }
+.badge .dot { width: .5rem; height: .5rem; border-radius: 999px; }
+.badge-teratur { background: rgb(16 185 129 / 0.14); color: #047857; }
+.badge-teratur .dot { background: var(--teratur); }
+.badge-takteratur { background: rgb(245 158 11 / 0.16); color: #b45309; }
+.badge-takteratur .dot { background: var(--takteratur); }
+.dark .badge-teratur { color: #6ee7b7; }
+.dark .badge-takteratur { color: #fcd34d; }
+
+/* --- Tombol --- */
+.btn { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600;
+  font-size: .85rem; padding: .55rem .9rem; border-radius: .8rem; cursor: pointer;
+  transition: all .16s ease; border: 1px solid transparent; }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-600); box-shadow: 0 10px 24px -10px rgb(13 148 136 / 0.6); }
+.btn-ghost { background: var(--surface); color: var(--ink-2); border-color: var(--line); }
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary-600); }
+
+/* --- Tabel --- */
+.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .86rem; }
+.tbl thead th { text-align: left; font-weight: 600; color: var(--muted);
+  padding: .7rem .9rem; font-size: .74rem; text-transform: uppercase; letter-spacing: .03em; }
+.tbl tbody td { padding: .7rem .9rem; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.tbl tbody tr { transition: background-color .12s ease; }
+.tbl tbody tr:hover { background: rgb(13 148 136 / 0.04); }
+
+/* --- Input --- */
+.field { width: 100%; background: var(--surface); border: 1px solid var(--line);
+  border-radius: .7rem; padding: .55rem .7rem; font-size: .88rem; color: var(--ink);
+  transition: border-color .15s ease, box-shadow .15s ease; }
+.field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+
+/* --- Skeleton loading --- */
+.skeleton { background: linear-gradient(90deg, var(--line) 25%, rgb(148 163 184 / 0.12) 37%, var(--line) 63%);
+  background-size: 400% 100%; animation: shimmer 1.4s ease infinite; border-radius: .6rem; }
+@keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+/* --- Animasi masuk --- */
+.fade-up { animation: fadeUp .45s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* --- Scrollbar halus --- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; border: 2px solid var(--surface); }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* --- Chart tooltip (Chart.js custom) --- */
+.chartjs-tooltip { pointer-events: none; }

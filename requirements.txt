@@ -1,0 +1,25 @@
+# ============================================================
+# Dependensi INTI (wajib) — Pipeline Decision Tree
+# Sesuai SPESIFIKASI-SISTEM-PREDIKSI-HAID.md §2.1
+# Instal:  pip install -r requirements.txt
+# ============================================================
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.5
+matplotlib>=3.8
+seaborn>=0.13
+joblib>=1.4
+pyyaml>=6.0
+
+# ------------------------------------------------------------
+# Dependensi PENDUKUNG (opsional / disarankan) — §2.2
+# Boleh dihapus bila tidak dipakai agar tetap ramping.
+# ------------------------------------------------------------
+imbalanced-learn>=0.12   # SMOTE / balancing data tidak seimbang
+openpyxl>=3.1            # baca kuesioner .xlsx
+pydantic>=2.7            # validasi skema baris & konfigurasi
+python-dotenv>=1.0       # muat variabel lingkungan dari .env
+
+# CATATAN: TensorFlow/Keras/PyTorch/SciPy/Dask TIDAK diperlukan
+# untuk Decision Tree — sengaja tidak dimasukkan (§2.2 catatan).
+# UI berupa HTML/CSS/JS statis — tidak menambah dependensi web apa pun.

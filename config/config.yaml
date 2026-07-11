@@ -1,0 +1,44 @@
+# ============================================================
+# Konfigurasi terpusat — Prediksi Keteraturan Haid Santriwati
+# Semua parameter & path dikumpulkan di sini (bukan hard-code).
+# Dibaca oleh: prediksi_haid.config.load_config()
+# Acuan: SPESIFIKASI-SISTEM-PREDIKSI-HAID.md §6
+# ============================================================
+
+# --- Lokasi berkas & folder (relatif terhadap akar proyek) ---
+paths:
+  raw_data: data/raw/kuesioner_santriwati.csv     # CSV kuesioner mentah
+  interim_data: data/interim/data_bersih.csv       # data setelah cleaning
+  processed_dir: data/processed                    # folder dataset final (X/y train/test)
+  model_output: models/decision_tree_model.joblib  # model terlatih
+  encoder_output: models/label_encoders.joblib     # encoder tersimpan
+  reports_dir: reports                             # folder laporan (JSON)
+  figures_dir: reports/figures                     # folder gambar (PNG)
+
+# --- Pembagian data latih : uji (80:20) ---
+split:
+  test_size: 0.20        # proporsi data uji
+  random_state: 42       # seed reproduksibilitas
+  stratify: true         # menjaga proporsi kelas target
+
+# --- Preprocessing (KDD-2) ---
+preprocessing:
+  drop_duplicates: true
+  missing_strategy: drop   # "drop" | "median" | "mode"
+  balance_method: none     # "none" | "smote" | "undersample"
+
+# --- Hyperparameter Decision Tree (DecisionTreeClassifier) ---
+decision_tree:
+  criterion: gini          # "gini" | "entropy"
+  max_depth: null          # int | null (null = tanpa batas → tuning)
+  min_samples_split: 2
+  min_samples_leaf: 1
+  max_features: null       # "sqrt" | "log2" | null
+  ccp_alpha: 0.0           # cost-complexity pruning
+  class_weight: balanced   # "balanced" | null
+
+# --- Evaluasi (KDD-5) ---
+evaluation:
+  metrics: [accuracy, precision, recall, f1, roc_auc]
+  average: binary
+  pos_label: 1

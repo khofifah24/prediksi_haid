@@ -1,0 +1,6 @@
+responden_id,nama,usia,lama_mondok,tingkat_pendidikan,q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,keteraturan_haid
+S001,Santri A,16,3,MTs,S,SS,TS,N,S,S,SS,TS,N,S,TS,SS,S,N,S,tidak teratur
+S002,Santri B,17,4,MA,N,S,S,S,TS,N,TS,S,S,N,S,S,SS,S,S,teratur
+S003,Santri C,15,2,MTs,SS,SS,STS,TS,SS,S,SS,TS,TS,SS,STS,SS,SS,S,SS,tidak teratur
+S004,Santri D,18,5,MA,S,N,S,SS,N,TS,N,SS,S,S,S,S,S,S,N,teratur
+S005,Santri E,16,3,MTs,TS,S,SS,S,S,N,TS,N,S,TS,S,N,S,S,S,teratur
