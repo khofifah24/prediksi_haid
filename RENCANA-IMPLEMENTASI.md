@@ -105,11 +105,10 @@
 
 ### FASE 6 — KDD-5 · Evaluation (`evaluation.py`)
 
-- [ ] **6.1** `evaluate_model(model, X_test, y_test)` → dict: accuracy, precision, recall, f1, roc_auc, confusion_matrix, support_train/test (kunci sesuai §11).
+- [ ] **6.1** `evaluate_model(model, X_test, y_test)` → dict: accuracy, precision, recall, f1, confusion_matrix, support_train/test (kunci sesuai §11).
 - [ ] **6.2** `build_confusion_matrix(y_true, y_pred)` → array 2×2.
-- [ ] **6.3** `compute_roc_auc(model, X_test, y_test)` — dari `predict_proba`.
-- [ ] **6.4** `export_metrics(metrics, path)` → `reports/metrik_evaluasi.json`.
-- [ ] **6.5** Aktifkan & lengkapi `tests/test_evaluation.py`: bentuk confusion matrix, rentang metrik 0–1, JSON tertulis.
+- [ ] **6.3** `export_metrics(metrics, path)` → `reports/metrik_evaluasi.json`.
+- [ ] **6.4** Aktifkan & lengkapi `tests/test_evaluation.py`: bentuk confusion matrix, rentang metrik 0–1, JSON tertulis.
 
 **Selesai bila:** `reports/metrik_evaluasi.json` berisi metrik nyata (bukan placeholder).
 
@@ -119,11 +118,10 @@
 
 - [ ] **7.1** `plot_decision_tree(...)` → `reports/figures/pohon_keputusan.png` (`sklearn.tree.plot_tree`).
 - [ ] **7.2** `plot_confusion_matrix(...)` → heatmap (seaborn) `confusion_matrix.png`.
-- [ ] **7.3** `plot_roc_curve(...)` → `kurva_roc.png`.
-- [ ] **7.4** `plot_feature_importance(...)` → `feature_importance.png`.
-- [ ] **7.5** Gunakan backend non-interaktif (`matplotlib` `Agg`) agar aman dijalankan headless/CLI.
+- [ ] **7.3** `plot_feature_importance(...)` → `feature_importance.png`.
+- [ ] **7.4** Gunakan backend non-interaktif (`matplotlib` `Agg`) agar aman dijalankan headless/CLI.
 
-**Selesai bila:** empat PNG tersimpan di `reports/figures/`.
+**Selesai bila:** tiga PNG tersimpan di `reports/figures/`.
 
 ---
 

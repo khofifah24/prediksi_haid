@@ -1,4 +1,4 @@
-"""Visualisasi (visualization.py) — pohon, confusion matrix, ROC, importance.
+"""Visualisasi (visualization.py) — pohon, confusion matrix, feature importance.
 
 Menyimpan gambar PNG ke ``reports/figures/``. Memakai backend non-interaktif
 (``Agg``) agar aman dijalankan headless / dari CLI. Signature acuan: §8.8.
@@ -15,7 +15,6 @@ matplotlib.use("Agg")  # backend headless — harus sebelum import pyplot
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import seaborn as sns  # noqa: E402
-from sklearn.metrics import RocCurveDisplay  # noqa: E402
 from sklearn.tree import plot_tree  # noqa: E402
 
 
@@ -56,17 +55,6 @@ def plot_confusion_matrix(cm, labels, output_path: str) -> None:
     ax.set_xlabel("Prediksi")
     ax.set_ylabel("Aktual")
     ax.set_title("Confusion Matrix")
-    fig.savefig(output_path, dpi=120, bbox_inches="tight")
-    plt.close(fig)
-
-
-def plot_roc_curve(model, X_test, y_test, output_path: str) -> None:
-    """Render kurva ROC (PNG)."""
-    _ensure_parent(output_path)
-    fig, ax = plt.subplots(figsize=(5, 4))
-    RocCurveDisplay.from_estimator(model, X_test, y_test, ax=ax)
-    ax.plot([0, 1], [0, 1], linestyle="--", color="gray", linewidth=1)
-    ax.set_title("Kurva ROC")
     fig.savefig(output_path, dpi=120, bbox_inches="tight")
     plt.close(fig)
 

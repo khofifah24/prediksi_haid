@@ -50,7 +50,7 @@ Sidebar kiri, mengikuti tata letak referensi (logo → grup MENU → grup GENERA
 | Data Santriwati | `santriwati.html` | `reports/data_santriwati.json` (atau CSV) |
 | Proses Decision Tree | `proses.html` | `reports/status_model.json` (form parameter → disimpan lokal) |
 | Pengujian | `pengujian.html` | `reports/aturan_pohon.json`, `reports/data_uji.json` |
-| Evaluasi Model | `evaluasi.html` | `reports/metrik_evaluasi.json`, `reports/figures/pohon_keputusan.png`, `reports/figures/confusion_matrix.png`, `reports/figures/kurva_roc.png` |
+| Evaluasi Model | `evaluasi.html` | `reports/metrik_evaluasi.json`, `reports/figures/pohon_keputusan.png`, `reports/figures/confusion_matrix.png`, `reports/figures/feature_importance.png` |
 | Login/Register (opsional) | `login.html`, `register.html` | — |
 
 > **Catatan alur:** perhitungan Decision Tree (latih model, metrik, gambar pohon) dilakukan **sekali** oleh skrip Python, hasilnya diekspor ke `reports/`. UI hanya **menampilkan** hasil tersebut — jadi cukup HTML/CSS/JS statis tanpa backend berjalan.
@@ -248,16 +248,16 @@ Metrik performa + visualisasi pohon. Sumber lampiran bab hasil skripsi.
 ┌──────────────────────────────────────────────────────────────────┐
 │  Evaluasi Model                                                    │
 │                                                                    │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
-│  │Accuracy │ │Precision│ │ Recall  │ │   F1    │ │ ROC-AUC │       │
-│  │ 87.5 %  │ │ 0.86    │ │ 0.84    │ │ 0.85    │ │  0.90   │       │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐                   │
+│  │Accuracy │ │Precision│ │ Recall  │ │   F1    │                   │
+│  │ 87.5 %  │ │ 0.86    │ │ 0.84    │ │ 0.85    │                   │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘                   │
 │                                                                    │
 │  ┌──────────────────────────┐   ┌────────────────────────────┐    │
-│  │ Confusion Matrix (heatmap)│   │ Kurva ROC                  │    │
-│  │        Pred:0  Pred:1     │   │      ╱▔▔▔                   │    │
-│  │  Act0 [ TN ][ FP ]        │   │    ╱                        │    │
-│  │  Act1 [ FN ][ TP ]        │   │  ╱                          │    │
+│  │ Confusion Matrix          │   │ Feature Importance (bar)   │    │
+│  │        Pred:0  Pred:1     │   │ Stres    ▇▇▇▇▇▇ 0.31        │    │
+│  │  Act0 [ TN ][ FP ]        │   │ Tidur    ▇▇▇▇▇  0.24        │    │
+│  │  Act1 [ FN ][ TP ]        │   │ Lelah    ▇▇▇▇   0.18        │    │
 │  └──────────────────────────┘   └────────────────────────────┘    │
 │                                                                    │
 │  ┌────────────────────────────────────────────────────────────┐   │
@@ -269,8 +269,8 @@ Metrik performa + visualisasi pohon. Sumber lampiran bab hasil skripsi.
 ```
 
 **Komponen & fitur**
-- **5 kartu metrik**: Accuracy, Precision, Recall, F1, ROC-AUC (dari `reports/metrik_evaluasi.json`).
-- **Confusion matrix** (heatmap 2×2) + **kurva ROC**.
+- **4 kartu metrik**: Accuracy, Precision, Recall, F1 (dari `reports/metrik_evaluasi.json`).
+- **Confusion matrix** (heatmap 2×2) + **feature importance** (bar).
 - **Visualisasi pohon keputusan** + tombol **Unduh PNG** (dari `visualization.plot_decision_tree`).
 - Semua gambar dapat diunduh untuk dilampirkan ke laporan.
 
@@ -369,7 +369,7 @@ ui/
 # reports/ (di akar proyek, bukan di ui/) — JSON & PNG hasil skrip Python, dibaca UI via ../reports/
 ```
 
-- **Grafik:** **Chart.js via CDN** untuk donat (distribusi kelas) & bar (feature importance) yang interaktif + adaptif dark mode; visualisasi pohon, ROC, dan heatmap ditampilkan sebagai **PNG** hasil Matplotlib/Seaborn dari `reports/figures/`.
+- **Grafik:** **Chart.js via CDN** untuk donat (distribusi kelas) & bar (feature importance) yang interaktif + adaptif dark mode; visualisasi pohon dan heatmap confusion matrix ditampilkan sebagai **PNG** hasil Matplotlib/Seaborn dari `reports/figures/`.
 - **Tema:** Tailwind CSS via CDN + `assets/theme.js` (palet **teal** primary, semantik **hijau/amber** untuk kelas — divalidasi CVD-safe). Mendukung **mode gelap** (toggle di topbar, tersimpan di `localStorage`). Font **Inter** via Google Fonts.
 - **Data:** UI membaca berkas **JSON/CSV/PNG** di `reports/` menggunakan `fetch()`. Jalankan lewat server statis lokal agar `fetch` bekerja (mis. `python -m http.server` lalu buka `http://localhost:8000/ui/index.html`).
 - **Pemisahan tanggung jawab:** semua komputasi Decision Tree tetap di Python (spesifikasi terpisah); UI hanya lapisan presentasi. Ini menjaga UI ringan dan mudah dipresentasikan saat sidang.

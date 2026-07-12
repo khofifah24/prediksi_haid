@@ -39,6 +39,6 @@ decision_tree:
 
 # --- Evaluasi (KDD-5) ---
 evaluation:
-  metrics: [accuracy, precision, recall, f1, roc_auc]
+  metrics: [accuracy, precision, recall, f1]
   average: binary
   pos_label: 1

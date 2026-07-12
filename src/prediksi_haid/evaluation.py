@@ -1,6 +1,6 @@
 """KDD-5 Evaluation (evaluation.py).
 
-Hitung metrik, confusion matrix, ROC/AUC; ekspor ke JSON.
+Hitung metrik & confusion matrix; ekspor ke JSON.
 Signature acuan: SPESIFIKASI §8.7 & §11.
 """
 
@@ -16,7 +16,6 @@ from sklearn.metrics import (
     f1_score,
     precision_score,
     recall_score,
-    roc_auc_score,
 )
 
 from .constants import TARGET_LABELS
@@ -25,7 +24,7 @@ POS_LABEL = 1
 
 
 def evaluate_model(model, X_test, y_test) -> dict:
-    """Hitung accuracy/precision/recall/f1/roc_auc + confusion_matrix -> dict.
+    """Hitung accuracy/precision/recall/f1 + confusion_matrix -> dict.
 
     Kunci mengikuti SPESIFIKASI §11 sehingga langsung cocok untuk
     ``reports/metrik_evaluasi.json``.
@@ -38,7 +37,6 @@ def evaluate_model(model, X_test, y_test) -> dict:
         "precision": float(precision_score(y_test, y_pred, pos_label=POS_LABEL, zero_division=0)),
         "recall": float(recall_score(y_test, y_pred, pos_label=POS_LABEL, zero_division=0)),
         "f1_score": float(f1_score(y_test, y_pred, pos_label=POS_LABEL, zero_division=0)),
-        "roc_auc": compute_roc_auc(model, X_test, y_test),
         "confusion_matrix": cm.tolist(),
         "support_test": int(len(y_test)),
         "labels": TARGET_LABELS,
@@ -49,20 +47,6 @@ def evaluate_model(model, X_test, y_test) -> dict:
 def build_confusion_matrix(y_true, y_pred) -> np.ndarray:
     """Bangun confusion matrix 2x2 (baris=aktual, kolom=prediksi; label [0,1])."""
     return confusion_matrix(y_true, y_pred, labels=[0, 1])
-
-
-def compute_roc_auc(model, X_test, y_test) -> float:
-    """Hitung ROC-AUC dari probabilitas kelas positif.
-
-    Mengembalikan ``nan`` bila hanya satu kelas hadir di ``y_test`` (AUC takdefinisi).
-    """
-    if len(np.unique(y_test)) < 2:
-        return float("nan")
-    if hasattr(model, "predict_proba"):
-        y_score = model.predict_proba(X_test)[:, 1]
-    else:  # fallback
-        y_score = model.predict(X_test)
-    return float(roc_auc_score(y_test, y_score))
 
 
 def export_metrics(metrics: dict, path: str) -> None:

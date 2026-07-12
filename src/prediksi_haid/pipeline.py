@@ -116,7 +116,6 @@ def run_training_pipeline(config: dict[str, Any]) -> dict[str, Any]:
     visualization.plot_confusion_matrix(
         metrics["confusion_matrix"], TARGET_LABELS, str(fig / "confusion_matrix.png")
     )
-    visualization.plot_roc_curve(model, X_test, y_test, str(fig / "kurva_roc.png"))
     visualization.plot_feature_importance(importance, str(fig / "feature_importance.png"))
 
     # --- Ekspor artefak untuk UI statis (§11.1)
@@ -149,7 +148,6 @@ def run_training_pipeline(config: dict[str, Any]) -> dict[str, Any]:
         "n_test": int(len(y_test)),
         "accuracy": metrics["accuracy"],
         "f1_score": metrics["f1_score"],
-        "roc_auc": metrics["roc_auc"],
     }
 
 

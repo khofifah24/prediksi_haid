@@ -62,8 +62,8 @@
             <p class="text-[0.78rem] mb-2" style="color:var(--muted)">Proporsi keteraturan haid</p>
             <div class="relative" style="height:230px"><canvas id="donut"></canvas>
               <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span class="text-[1.7rem] font-extrabold" style="color:var(--ink)">${s.total_data}</span>
-                <span class="text-[0.72rem]" style="color:var(--muted)">total data</span>
+                <span class="text-[1.5rem] font-extrabold leading-none" style="color:var(--ink)">${s.total_data}</span>
+                <span class="text-[0.68rem] mt-0.5" style="color:var(--muted)">total data</span>
               </div>
             </div>
             <div class="flex justify-center gap-5 mt-2 text-[0.8rem]">
@@ -99,7 +99,7 @@
             datasets: [{ data: [s.jumlah_teratur, s.jumlah_tidak_teratur],
               backgroundColor: [c.teratur, c.takteratur], borderColor: c.surface,
               borderWidth: 3, hoverOffset: 6 }] },
-          options: { cutout: "70%", plugins: { legend: { display: false },
+          options: { cutout: "78%", plugins: { legend: { display: false },
             tooltip: tooltipStyle(c) }, animation: { animateScale: true } },
         });
 

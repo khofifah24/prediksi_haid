@@ -45,7 +45,7 @@ def main() -> int:
     evaluation.export_metrics(metrics, str(out))
 
     print(f"Metrik disimpan ke {out}")
-    for k in ("accuracy", "precision", "recall", "f1_score", "roc_auc"):
+    for k in ("accuracy", "precision", "recall", "f1_score"):
         print(f"  {k:10s}: {metrics[k]:.4f}")
     return 0
 

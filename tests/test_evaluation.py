@@ -23,9 +23,10 @@ def test_build_confusion_matrix_shape():
 def test_evaluate_model_keys_and_range():
     m, X, y = _fitted()
     metrics = evaluation.evaluate_model(m, X, y)
-    for k in ("accuracy", "precision", "recall", "f1_score", "roc_auc"):
+    for k in ("accuracy", "precision", "recall", "f1_score"):
         assert k in metrics
         assert 0.0 <= metrics[k] <= 1.0 or np.isnan(metrics[k])
+    assert "roc_auc" not in metrics  # ROC-AUC sengaja tidak dipakai
     assert np.array(metrics["confusion_matrix"]).shape == (2, 2)
 
 

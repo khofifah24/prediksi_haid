@@ -33,12 +33,11 @@
 
       const pctv = (x) => (x*100).toFixed(1)+"%";
       page.innerHTML = `
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           ${metric("Accuracy", pctv(m.accuracy), m.accuracy*100, "#0d9488")}
           ${metric("Precision", m.precision.toFixed(2), m.precision*100, "#6366f1")}
           ${metric("Recall", m.recall.toFixed(2), m.recall*100, "#0ea5e9")}
           ${metric("F1-Score", m.f1_score.toFixed(2), m.f1_score*100, "#8b5cf6")}
-          ${metric("ROC-AUC", isNaN(m.roc_auc)?"—":m.roc_auc.toFixed(2), (m.roc_auc||0)*100, "#10b981")}
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
@@ -46,15 +45,14 @@
             <h3 class="font-semibold mb-3" style="color:var(--ink)">Confusion Matrix</h3>
             ${confusionHTML(m.confusion_matrix)}
           </div>
-          ${figCard("Kurva ROC", "kurva_roc.png")}
+          ${figCard("Feature Importance", "feature_importance.png")}
         </div>
 
         <div class="mt-4">
           ${figCard("Visualisasi Pohon Keputusan", "pohon_keputusan.png", true)}
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          ${figCard("Confusion Matrix (Heatmap)", "confusion_matrix.png")}
-          ${figCard("Feature Importance", "feature_importance.png")}
+        <div class="mt-4">
+          ${figCard("Confusion Matrix (Heatmap)", "confusion_matrix.png", true)}
         </div>`;
     })();
 

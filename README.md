@@ -161,15 +161,15 @@ Tahapan yang dijalankan otomatis (**SPESIFIKASI §12**):
 | 3. Transformation | Likert→angka, agregasi rata-rata, target→0/1 | `data/processed/dataset_encoded.csv` |
 | 4. Split 80:20 | *stratified*, `random_state=42` | `X_train/X_test/y_train/y_test.csv` |
 | 5. **Training** | latih Decision Tree | `models/decision_tree_model.joblib` |
-| 6. Evaluation | akurasi, precision, recall, F1, ROC-AUC, confusion matrix | `reports/metrik_evaluasi.json` |
-| 7. Visualization | render 4 grafik | `reports/figures/*.png` |
+| 6. Evaluation | akurasi, precision, recall, F1, confusion matrix | `reports/metrik_evaluasi.json` |
+| 7. Visualization | render 3 grafik | `reports/figures/*.png` |
 | 8. Ekspor UI | ringkasan, importance, data, aturan pohon, data uji | `reports/*.json` |
 
 Contoh keluaran ringkas di terminal:
 
 ```
 Pelatihan selesai: {'model_path': 'models/decision_tree_model.joblib',
- 'n_train': 225, 'n_test': 57, 'accuracy': 0.60, 'f1_score': 0.49, 'roc_auc': 0.61}
+ 'n_train': 225, 'n_test': 57, 'accuracy': 0.60, 'f1_score': 0.49}
 ```
 
 > ℹ️ Dengan **data sintetis**, akurasi wajar berkisar ~0.6 (sinyalnya lemah karena acak).
@@ -216,7 +216,7 @@ Halaman yang tersedia:
 | **Data Santriwati** | tabel dataset (ID anonim + 7 skor + status) | `data_santriwati.json` |
 | **Proses D-Tree** | form parameter + generator perintah latih | — |
 | **Pengujian** | prediksi kasus baru (geser 7 skor) — ditelusuri di browser | `aturan_pohon.json` |
-| **Evaluasi Model** | metrik + confusion matrix + pohon/ROC | `metrik_evaluasi.json`, `figures/*.png` |
+| **Evaluasi Model** | metrik + confusion matrix + pohon + importance | `metrik_evaluasi.json`, `figures/*.png` |
 
 Alur ideal saat demo/sidang: **Data → Proses → Pengujian → Evaluasi**.
 Fitur lain: mode gelap (ikon di kanan atas), responsif, disclaimer non-medis.
@@ -253,7 +253,7 @@ prediksi_haid/
 │   └── processed/             # dataset final (X/y train/test + dataset_encoded)
 ├── models/                    # model .joblib (hasil latih)
 ├── reports/
-│   ├── figures/               # PNG: pohon, confusion matrix, ROC, importance
+│   ├── figures/               # PNG: pohon, confusion matrix, feature importance
 │   ├── metrik_evaluasi.json   # metrik evaluasi
 │   └── *.json                 # ekspor UI (ringkasan, importance, data, aturan_pohon, data_uji)
 ├── notebooks/                 # EDA (01_eksplorasi_data.ipynb)
@@ -280,7 +280,7 @@ prediksi_haid/
 - [x] Struktur proyek, dependensi, konfigurasi, konstanta
 - [x] Modul KDD lengkap (`data_loader` … `pipeline`) — pipeline berjalan end-to-end
 - [x] CLI: generate data, training, evaluation, prediction
-- [x] Visualisasi PNG (pohon, confusion matrix, ROC, feature importance)
+- [x] Visualisasi PNG (pohon, confusion matrix, feature importance)
 - [x] Generator data sintetis + unit test (31 tes hijau) + lolos `ruff`
 - [x] Ekspor artefak UI (`web_export`) + prediksi pohon di browser
 - [x] UI web modern (6 halaman, mode gelap) menampilkan hasil pipeline nyata

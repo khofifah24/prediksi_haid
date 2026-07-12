@@ -17,7 +17,7 @@
 | **Tugas** | Klasifikasi biner: **teratur (1)** vs **tidak teratur (0)** |
 | **Sumber data** | Kuesioner (skala Likert 1–5) + observasi; ± 300 responden santriwati |
 | **Rasio split** | 80% *training* : 20% *testing* |
-| **Metrik evaluasi** | *Accuracy*, *Precision*, *Recall*, *ROC/AUC*, *Confusion Matrix* |
+| **Metrik evaluasi** | *Accuracy*, *Precision*, *Recall*, *F1-Score*, *Confusion Matrix* |
 | **Lokasi studi** | Pondok Pesantren Annuqayah, Guluk-Guluk, Sumenep |
 | **Batasan** | Hanya faktor jadwal/aktivitas; tidak mencakup faktor medis/hormonal; bukan alat diagnosis medis |
 
@@ -35,7 +35,7 @@
 | `pandas` | `>=2.2` | Muat & manipulasi dataset kuesioner (DataFrame) |
 | `numpy` | `>=1.26` | Operasi numerik, array fitur |
 | `scikit-learn` | `>=1.5` | `DecisionTreeClassifier`, split, metrik, `LabelEncoder` |
-| `matplotlib` | `>=3.8` | Visualisasi pohon, kurva ROC, grafik |
+| `matplotlib` | `>=3.8` | Visualisasi pohon & grafik |
 | `seaborn` | `>=0.13` | Heatmap *confusion matrix*, distribusi fitur |
 | `joblib` | `>=1.4` | Serialisasi model (`.joblib`) |
 | `pyyaml` | `>=6.0` | Baca berkas konfigurasi `config.yaml` |
@@ -97,9 +97,8 @@ prediksi-keteraturan-haid/
 │   ├── figures/
 │   │   ├── pohon_keputusan.png
 │   │   ├── confusion_matrix.png
-│   │   ├── kurva_roc.png
 │   │   └── feature_importance.png
-│   └── metrik_evaluasi.json         # accuracy/precision/recall/AUC
+│   └── metrik_evaluasi.json         # accuracy/precision/recall/f1
 │
 ├── notebooks/
 │   └── 01_eksplorasi_data.ipynb     # EDA (penamaan: NN_deskripsi)
@@ -115,7 +114,7 @@ prediksi-keteraturan-haid/
 │       ├── dataset_splitter.py      # pembagian train/test 80:20
 │       ├── model.py                 # KDD-4: Data Mining (Decision Tree)
 │       ├── evaluation.py            # KDD-5: Evaluation (metrik + confmat)
-│       ├── visualization.py         # plot pohon, ROC, importance
+│       ├── visualization.py         # plot pohon, confusion matrix, importance
 │       ├── predictor.py             # inferensi data baru
 │       └── pipeline.py              # orkestrasi end-to-end KDD
 │
@@ -248,7 +247,7 @@ decision_tree:        # hyperparameter DecisionTreeClassifier
   class_weight        # "balanced" | null
 
 evaluation:
-  metrics             # ["accuracy","precision","recall","f1","roc_auc"]
+  metrics             # ["accuracy","precision","recall","f1"]
   average             # "binary"
   pos_label           # 1
 ```
@@ -308,7 +307,7 @@ Arsitektur berlapis: setiap tahap KDD = satu modul dengan fungsi berparameter je
                        │ evaluation.py           │  KDD-5 Evaluation
                        │  evaluate_model()       │  (confusion matrix,
                        │  build_confusion_matrix │   accuracy/precision/
-                       │  compute_roc_auc()      │   recall/ROC)
+                       │                         │   recall/f1)
                        └───────────┬─────────────┘
                                    ▼
                        ┌─────────────────────────┐
@@ -371,9 +370,8 @@ def load_model(path: str) -> sklearn.tree.DecisionTreeClassifier
 
 ### 8.7 `evaluation.py` — *KDD-5 Evaluation*
 ```
-def evaluate_model(model, X_test, y_test) -> dict            # accuracy/precision/recall/f1/auc
+def evaluate_model(model, X_test, y_test) -> dict            # accuracy/precision/recall/f1
 def build_confusion_matrix(y_true, y_pred) -> numpy.ndarray
-def compute_roc_auc(model, X_test, y_test) -> float
 def export_metrics(metrics: dict, path: str) -> None         # -> reports/metrik_evaluasi.json
 ```
 
@@ -381,7 +379,6 @@ def export_metrics(metrics: dict, path: str) -> None         # -> reports/metrik
 ```
 def plot_decision_tree(model, feature_names, class_names, output_path: str) -> None
 def plot_confusion_matrix(cm, labels, output_path: str) -> None
-def plot_roc_curve(model, X_test, y_test, output_path: str) -> None
 def plot_feature_importance(importance_df, output_path: str) -> None
 ```
 
@@ -416,7 +413,6 @@ Nama variabel standar yang dipakai lintas modul agar konsisten.
 | `y_train`, `y_test` | `pandas.Series` | Target latih / uji |
 | `model` | `DecisionTreeClassifier` | Objek model |
 | `y_pred` | `numpy.ndarray` | Hasil prediksi kelas |
-| `y_proba` | `numpy.ndarray` | Probabilitas kelas positif |
 | `cm` | `numpy.ndarray` | *Confusion matrix* |
 | `metrics` | `dict` | Kumpulan skor evaluasi |
 | `feature_importance` | `pandas.DataFrame` | Skor pentingnya tiap fitur |
@@ -451,7 +447,6 @@ Nama variabel standar yang dipakai lintas modul agar konsisten.
 | `precision` | `float` | `precision_score(pos_label=1)` |
 | `recall` | `float` | `recall_score(pos_label=1)` |
 | `f1_score` | `float` | `f1_score(pos_label=1)` |
-| `roc_auc` | `float` | `roc_auc_score` |
 | `confusion_matrix` | `list[list[int]]` | `confusion_matrix` (2×2) |
 | `support_train` | `int` | Jumlah baris data latih (± 240) |
 | `support_test` | `int` | Jumlah baris data uji (± 60) |
@@ -477,7 +472,6 @@ Antarmuka web dibangun **tanpa framework backend** — hanya HTML/CSS/JS (opsion
 | `reports/data_uji.json` | JSON | Pengujian | 20% data uji + label aktual & prediksi |
 | `reports/figures/pohon_keputusan.png` | PNG | Evaluasi | visualisasi pohon |
 | `reports/figures/confusion_matrix.png` | PNG | Evaluasi | heatmap |
-| `reports/figures/kurva_roc.png` | PNG | Evaluasi | kurva ROC |
 | `reports/figures/feature_importance.png` | PNG | Dashboard/Evaluasi | bar (alternatif dari JSON) |
 
 Ekspor JSON tambahan ditangani fungsi ringan (mis. pada `evaluation.py`/`visualization.py` atau modul `web_export.py` opsional), semuanya sekadar `json.dump()` — **tidak menambah dependensi web** apa pun ke `requirements.txt`.
@@ -493,7 +487,7 @@ Ekspor JSON tambahan ditangani fungsi ringan (mis. pada `evaluation.py`/`visuali
 5. **Split** — bagi 80:20 (*stratified*, `random_state=42`) → simpan `X_train/X_test/y_train/y_test`.
 6. **Training** — `build_model()` + `train_model()` → simpan `models/decision_tree_model.joblib`.
 7. **Evaluation** — hitung metrik + *confusion matrix* → `reports/metrik_evaluasi.json`.
-8. **Visualization** — simpan pohon, ROC, *feature importance* ke `reports/figures/`.
+8. **Visualization** — simpan pohon, *confusion matrix*, *feature importance* ke `reports/figures/`.
 9. **Prediction** — `predict_batch()` mengklasifikasi data baru → **Teratur / Tidak Teratur**.
 
 ---
