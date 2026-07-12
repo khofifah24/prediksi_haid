@@ -30,7 +30,7 @@ preprocessing:
 # --- Hyperparameter Decision Tree (DecisionTreeClassifier) ---
 decision_tree:
   criterion: gini          # "gini" | "entropy"
-  max_depth: null          # int | null (null = tanpa batas → tuning)
+  max_depth: 3             # int | null — dibatasi (3) untuk cegah overfitting & pohon lebih terbaca
   min_samples_split: 2
   min_samples_leaf: 1
   max_features: null       # "sqrt" | "log2" | null

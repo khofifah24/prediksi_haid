@@ -7,6 +7,7 @@ Signature acuan: SPESIFIKASI §8.10 & §12.
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,7 @@ from . import (
     preprocessing,
     transformation,
     visualization,
+    web_export,
 )
 from . import (
     model as model_mod,
@@ -116,6 +118,30 @@ def run_training_pipeline(config: dict[str, Any]) -> dict[str, Any]:
     )
     visualization.plot_roc_curve(model, X_test, y_test, str(fig / "kurva_roc.png"))
     visualization.plot_feature_importance(importance, str(fig / "feature_importance.png"))
+
+    # --- Ekspor artefak untuk UI statis (§11.1)
+    reports = Path(paths["reports_dir"])
+    test_size = split_cfg.get("test_size", 0.20)
+    web_export.export_ringkasan(
+        {
+            "total_data": int(len(df_encoded)),
+            "jumlah_teratur": int((y == 1).sum()),
+            "jumlah_tidak_teratur": int((y == 0).sum()),
+            "akurasi": metrics["accuracy"],
+            "tanggal_latih": date.today().isoformat(),
+            "rasio_split": f"{int((1 - test_size) * 100)}:{int(test_size * 100)}",
+        },
+        str(reports / "ringkasan.json"),
+    )
+    web_export.export_feature_importance(importance, str(reports / "feature_importance.json"))
+    web_export.export_data_santriwati(df_encoded, str(reports / "data_santriwati.json"))
+    web_export.export_aturan_pohon(model, FEATURE_COLUMNS, str(reports / "aturan_pohon.json"))
+
+    y_pred_test = model.predict(X_test)
+    test_ids = None
+    if "responden_id" in df_encoded:
+        test_ids = df_encoded.loc[X_test.index, "responden_id"]
+    web_export.export_data_uji(test_ids, y_test, y_pred_test, str(reports / "data_uji.json"))
 
     return {
         "model_path": paths["model_output"],

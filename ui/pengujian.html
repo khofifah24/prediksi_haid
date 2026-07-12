@@ -63,21 +63,43 @@
         </div>
       </div>`;
 
+    // Nama variabel yang manusiawi untuk "faktor dominan".
+    const NAMA_FITUR = {
+      jadwal_kegiatan_harian:"Jadwal Kegiatan", pola_tidur:"Pola Tidur",
+      tingkat_kelelahan:"Tingkat Kelelahan", tingkat_stres:"Tingkat Stres",
+      pola_makan:"Pola Makan", aktivitas_harian:"Aktivitas Harian", waktu_istirahat:"Waktu Istirahat",
+    };
+
+    // Telusuri aturan pohon (hasil ekspor Python) memakai skor input.
+    // Aturan sklearn: fitur <= threshold → cabang kiri, selainnya kanan.
+    function evaluateTree(node, fitur) {
+      const jalur = [];
+      while (node && !node.leaf) {
+        jalur.push(node.feature);
+        node = (fitur[node.feature] <= node.threshold) ? node.left : node.right;
+      }
+      // faktor dominan = fitur unik pertama sepanjang jalur keputusan
+      const faktor = [...new Set(jalur)].slice(0, 3).map(f => NAMA_FITUR[f] || f);
+      return {
+        label: node ? node.label : 0,
+        conf: Math.round((node ? node.confidence : 0.5) * 100),
+        faktor: faktor.length ? faktor : ["—"],
+      };
+    }
+
     async function prediksi() {
       const fitur = {}; FITUR.forEach(([k]) => fitur[k] = parseFloat(document.getElementById(k).value));
       const aturan = await loadReport("aturan_pohon.json");
       const box = document.getElementById("result");
 
-      // Heuristik sementara bila aturan_pohon.json belum diekspor pipeline:
-      // rerata skor "risiko" tinggi (stres, kelelahan, jadwal padat, tidur buruk) → cenderung tidak teratur.
       let label, conf, faktor;
-      if (aturan && typeof evaluateTree === "function") {
-        ({ label, conf, faktor } = evaluateTree(aturan, fitur)); // hook masa depan
+      if (aturan) {
+        ({ label, conf, faktor } = evaluateTree(aturan, fitur));
       } else {
+        // Fallback bila pipeline belum dijalankan (aturan_pohon.json belum ada).
         const risiko = (fitur.tingkat_stres + fitur.tingkat_kelelahan + fitur.jadwal_kegiatan_harian
           + (6 - fitur.pola_tidur) + (6 - fitur.waktu_istirahat)) / 5;
-        const teratur = risiko < 3;
-        label = teratur ? 1 : 0;
+        label = risiko < 3 ? 1 : 0;
         conf = Math.round((Math.abs(risiko - 3) / 2) * 40 + 55);
         faktor = ["Tingkat Stres","Pola Tidur","Kelelahan"];
       }
@@ -123,6 +145,18 @@
         r.style.background=`linear-gradient(90deg,var(--primary) ${p}%,var(--line) ${p}%)`; };
       r.addEventListener("input",paint); paint();
     });
+
+    // Demo cepat (mis. saat sidang): buka pengujian.html#demo untuk contoh profil
+    // berisiko tinggi + langsung menjalankan prediksi.
+    if (location.hash === "#demo") {
+      const preset = { tingkat_stres:5, tingkat_kelelahan:4.5, jadwal_kegiatan_harian:4.5,
+        pola_tidur:2, waktu_istirahat:2, pola_makan:3, aktivitas_harian:4 };
+      Object.entries(preset).forEach(([k,v])=>{
+        const el=document.getElementById(k);
+        if(el){ el.value=v; el.dispatchEvent(new Event("input")); }
+      });
+      setTimeout(prediksi, 200);
+    }
   </script>
 </body>
 </html>

@@ -36,11 +36,13 @@ def encode_likert(df: pd.DataFrame, mapping: dict) -> pd.DataFrame:
 def aggregate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """Agregasi item q1..q11 menjadi 7 kolom fitur via **rata-rata** (mean).
 
-    Menjaga skala tetap 1..5 walau jumlah item beda (2 vs 1). Kolom target
-    dipertahankan bila ada.
+    Menjaga skala tetap 1..5 walau jumlah item beda (2 vs 1). Kolom ``responden_id``
+    (bila ada) & target dipertahankan untuk keperluan ekspor/audit.
     """
     df = df.copy()
     out = pd.DataFrame(index=df.index)
+    if "responden_id" in df.columns:
+        out["responden_id"] = df["responden_id"].values
     for feature, items in FEATURE_ITEM_MAP.items():
         cols = [c for c in items if c in df.columns]
         out[feature] = df[cols].mean(axis=1)
